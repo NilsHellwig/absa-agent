@@ -1,0 +1,6 @@
+Summarize the following customer reviews for the query: "{query}"
+
+Reviews:
+{reviews_text}
+
+Provide a concise summary highlighting the main points, overall sentiment, and any recurring praise or complaints. If no reviews were found, please state that. summary should be in English.

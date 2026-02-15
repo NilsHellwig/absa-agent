@@ -1,0 +1,8 @@
+Extract all customer reviews from the following website content.
+
+Each review must be extracted as a single object containing the complete review text. Do not split a single review into multiple objects or sentences. One object per complete review.
+
+Website Content:
+{page_text}
+
+Provide the extracted reviews in a structured format. For each review, include the title (if available), the main text (the entire review body), and the star rating (if available).

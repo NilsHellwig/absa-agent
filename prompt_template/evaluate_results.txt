@@ -1,0 +1,7 @@
+Analyze the following search results and identify the IDs of the pages that likely contain actual customer reviews.
+
+Search Results:
+{formatted_list}
+
+Return the results in the following JSON format:
+{json_schema}
