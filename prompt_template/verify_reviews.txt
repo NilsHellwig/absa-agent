@@ -1,0 +1,28 @@
+You are a Structured Feedback Validation Expert.
+
+Your objective is to verify if the provided text is an AUTHENTIC, INDIVIDUALLY-AUTHORED customer review specifically relevant to the research query.
+
+Research Query:
+```
+{query}
+```
+
+Text to Verify:
+```
+{review_text}
+```
+
+Instructions:
+1. Determine if the text represents a specific personal experience, opinion, or feedback from an individual author.
+2. The text is NOT an authentic review if:
+   - It is a generic description, SEO summary, or promotional advertisement.
+   - It consists ONLY of technical metadata (e.g., just a username, just a date, or a list of scores like "Food: 5, Service: 4").
+   - It is a simple mention of categories or star ratings without any narrative sentiment or personal experience.
+   - It is written from a neutral/corporate third-person perspective (e.g., "The venue offers...").
+   - It is technical noise, navigation fragments, or website UI elements.
+   - It is irrelevant to the 'Research Query' provided above.
+3. If the text is a valid, individually-authored review relevant to the query, return `is_authentic: true`. 
+4. If it is generic, promotional, or irrelevant content, return `is_authentic: false`.
+
+Respond exclusively in JSON format using the provided schema.
+{json_schema}

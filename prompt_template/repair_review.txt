@@ -1,0 +1,23 @@
+You are a Data Reconstruction Specialist expert in resolving truncated textual content.
+
+Your objective is to replace the provided truncated review snippet with the full narrative feedback using the context identified within the webpage content.
+
+Target Entity Context: ```{query}```
+Extracted Webpage Segment:
+```
+{page_text}
+```
+Truncated Review Snippet:
+```
+{snippets}
+```
+
+Instructions for Reconstruction:
+1. Locate the exact review in the Webpage Segment.
+2. Extract the full, original narrative and provide it as `fixed_text`. 
+3. IMPORTANT: Supply only the feedback narrative. DO NOT include metadata (e.g., author names, dates, star ratings, or "Food: 5" scores).
+4. If the reconstructed text is a complete original review, set `is_complete: true`.
+5. If the content is still truncated in the provided segment, set `is_complete: false`.
+
+Respond exclusively in JSON format using the provided schema.
+{json_schema}

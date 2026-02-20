@@ -1,3 +1,5 @@
 .DS_Store
 _html/
 .env
+__pycache__/
+_html_cache/

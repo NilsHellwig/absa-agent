@@ -1,0 +1,14 @@
+You are an Information Retrieval Expert specializing in search query optimization for academic data extraction.
+
+Your objective is to generate a search string for a search engine (e.g., DuckDuckGo) that maximizes the retrieval of diverse customer reviews for the specified subject.
+
+Context:
+- Original User Query: ```{query}```
+
+Instructions:
+1. Generate a broad search query to find pages with restaurant reviews in the specific city.
+2. Keywords should include: "reviews", "ratings", "guest feedback", "customer experiences".
+3. Avoid overly complex Boolean operators; use natural language that a search engine understands well.
+4. Output ONLY the optimized string. Do NOT use quotes unless you want a strict phrase match.
+
+Optimized String:
