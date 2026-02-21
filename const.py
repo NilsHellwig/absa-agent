@@ -5,6 +5,11 @@ NUM_CTX = 2048 * 8
 
 # Environment fallbacks (Defaults, preferably defined in .env)
 DEFAULT_LLM_URL = "http://127.0.0.1:11434"
+DEFAULT_LLM_MODEL = "gemma3:27b"
+DEFAULT_REASONING_MODEL = "gpt-oss:20b"
+DEFAULT_TEMPERATURE = 0.0
+DEFAULT_MAX_REVIEWS = 50
+DEFAULT_RETRIEVER_MAX_RESULTS = 50
 
 # Caching & Storage
 HTML_CACHE_DIR = "_html_cache"

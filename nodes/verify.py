@@ -5,6 +5,7 @@ from helpers import load_prompt, get_llm
 from nodes.state import GraphState
 from nodes.models import ReviewVerification
 from monitor import TrackStep
+from const import DEFAULT_MAX_REVIEWS
 
 
 @traceable(run_type="chain", name="Review Verification Node")
@@ -54,7 +55,8 @@ def verify_reviews_node(state: GraphState):
             f"\nFinal Verification results: {len(verified_batch)} authentic, {rejected_count} rejected.")
 
     # Merge verified batch into global reviews (Respecting limit precisely)
-    max_req = state.get("max_reviews", 50)
+    config = state.get("config", {})
+    max_req = state.get("max_reviews", config.get("max_reviews", DEFAULT_MAX_REVIEWS))
     current_count = len(all_reviews)
     remaining_slots = max_req - current_count
 

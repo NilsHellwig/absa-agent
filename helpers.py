@@ -3,7 +3,8 @@ import hashlib
 import json
 from langchain_ollama import ChatOllama
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from const import HTML_CACHE_DIR, NUM_CTX, DEFAULT_LLM_URL
+from const import (HTML_CACHE_DIR, NUM_CTX, DEFAULT_LLM_URL, 
+                   DEFAULT_LLM_MODEL, DEFAULT_REASONING_MODEL, DEFAULT_TEMPERATURE)
 
 # Search Instance
 search_wrapper = DuckDuckGoSearchAPIWrapper()
@@ -14,9 +15,9 @@ def get_llm(config: dict, use_reasoning: bool = False):
     model_key = "llm_reasoning_model" if use_reasoning else "llm_model"
     # Provide defaults in case config is partial
     model_name = config.get(
-        model_key, "gpt-oss:20b" if use_reasoning else "gemma3:27b")
+        model_key, DEFAULT_REASONING_MODEL if use_reasoning else DEFAULT_LLM_MODEL)
     base_url = config.get("llm_url", DEFAULT_LLM_URL)
-    temp = config.get("llm_temperature", 0.0)
+    temp = config.get("llm_temperature", DEFAULT_TEMPERATURE)
 
     return ChatOllama(
         model=model_name,

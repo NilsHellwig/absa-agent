@@ -11,7 +11,8 @@ from nodes.extract import extract_and_detect_node
 from nodes.repair import repair_reviews_node
 from nodes.verify import verify_reviews_node
 from helpers import save_json
-from const import DEFAULT_LLM_URL
+from const import (DEFAULT_LLM_URL, DEFAULT_LLM_MODEL, DEFAULT_REASONING_MODEL, 
+                   DEFAULT_TEMPERATURE, DEFAULT_MAX_REVIEWS, DEFAULT_RETRIEVER_MAX_RESULTS)
 from dotenv import load_dotenv
 
 # Load explicitly
@@ -20,11 +21,12 @@ load_dotenv()
 # Standard Configurations with Environment Variable Integration
 # This dictionary serves as the central configuration for all agents
 DEFAULT_CONFIG = {
-    "llm_model": os.getenv("LLM_MODEL", "gemma3:27b"),
-    "llm_reasoning_model": os.getenv("LLM_REASONING_MODEL", "gpt-oss:20b"),
+    "llm_model": os.getenv("LLM_MODEL", DEFAULT_LLM_MODEL),
+    "llm_reasoning_model": os.getenv("LLM_REASONING_MODEL", DEFAULT_REASONING_MODEL),
     "llm_url": os.getenv("LLM_URL", DEFAULT_LLM_URL),
-    "llm_temperature": float(os.getenv("LLM_TEMPERATURE", 0.0)),
-    "retriever_max_results": int(os.getenv("RETRIEVER_MAX_RESULTS", 50)),
+    "llm_temperature": float(os.getenv("LLM_TEMPERATURE", DEFAULT_TEMPERATURE)),
+    "retriever_max_results": int(os.getenv("RETRIEVER_MAX_RESULTS", DEFAULT_RETRIEVER_MAX_RESULTS)),
+    "max_reviews": int(os.getenv("MAX_REVIEWS", DEFAULT_MAX_REVIEWS)),
     "skip_reformulation": False,
     "initial_urls": [],
     "disable_discovery": False
@@ -77,7 +79,7 @@ def create_graph(config_dict: dict):
     def router(state: GraphState):
         """BFS termination logic: Stop if limit reached or discovery queue is empty."""
         current_count = len(state.get("reviews", []))
-        max_req = state.get("max_reviews", 50)
+        max_req = state.get("max_reviews", state["config"].get("max_reviews", DEFAULT_MAX_REVIEWS))
 
         if current_count >= max_req:
             print(
@@ -132,7 +134,7 @@ def main():
         "topic", help="The research topic or entity to scrape reviews for")
     parser.add_argument(
         "--id", help="Session ID for result folder naming", default=uuid.uuid4().hex[:8])
-    parser.add_argument("--max_reviews", type=int, default=10,
+    parser.add_argument("--max_reviews", type=int, default=DEFAULT_CONFIG["max_reviews"],
                         help="Target number of reviews to collect")
     parser.add_argument(
         "--urls", nargs="+", help="Seed URLs to start with (bypasses search engine)", default=[])
@@ -173,6 +175,7 @@ def main():
         "relevant_ids": [],
         "reviews": [],
         "temp_reviews": [],
+        "seed_urls": config["initial_urls"],         # Track origins
         "found_review_urls": config["initial_urls"],  # Seed queue
         "visited_urls": [],
         "relevance_results": [],

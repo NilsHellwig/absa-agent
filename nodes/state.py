@@ -9,6 +9,7 @@ class GraphState(TypedDict):
     reviews: List[dict]           # Final, verified reviews
     # Currently being processed (extract -> repair -> verify)
     temp_reviews: List[dict]
+    seed_urls: List[str]         # Initial URLs (seed or search results)
     found_review_urls: List[str]  # Queue for BFS discovery
     visited_urls: List[str]       # History of processed URLs
     relevance_results: List[dict]  # Audit log of URLs checked

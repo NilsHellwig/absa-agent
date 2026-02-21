@@ -40,6 +40,7 @@ def retrieval_node(state: GraphState):
     return {
         "retrieved_content": filtered_results,
         "relevant_ids": relevant_ids,
+        "seed_urls": found_review_urls,
         "found_review_urls": found_review_urls,
         "step_metrics": metrics
     }

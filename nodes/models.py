@@ -19,8 +19,6 @@ class Review(BaseModel):
     review_text: str = Field(description="Content of the review")
     stars: Optional[int] = Field(
         description="Star rating (usually 1-5)", default=None)
-    found_via_discovery: bool = Field(
-        description="True if the review was found on a discovered link (BFS), False if from initial search results. Possible values: [true, false]", default=False)
 
 class ExtractionResult(BaseModel):
     reviews: List[Review] = Field(

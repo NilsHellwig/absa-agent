@@ -7,7 +7,8 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from langsmith import traceable
 from const import (HTML_CACHE_DIR, CACHE_INDEX_FILE, 
-                   MAX_FILTER_SNIPPET, MAX_EXTRACT_SNIPPET, MAX_DETECT_SNIPPET)
+                   MAX_FILTER_SNIPPET, MAX_EXTRACT_SNIPPET, MAX_DETECT_SNIPPET,
+                   DEFAULT_MAX_REVIEWS)
 from helpers import load_prompt, get_llm, get_cache_path
 from nodes.state import GraphState
 from nodes.models import PageRelevanceResult, Review, ExtractionResult, ReviewLinksDetection
@@ -92,7 +93,7 @@ def extract_and_detect_node(state: GraphState):
         print("--- EXTRACT AND DETECT ---")
         query = state["query"]
         config = state.get("config", {})
-        max_reviews = state.get("max_reviews", 50)
+        max_reviews = state.get("max_reviews", config.get("max_reviews", DEFAULT_MAX_REVIEWS))
         all_reviews = state.get("reviews", []) or []
 
         if len(all_reviews) >= max_reviews:
@@ -116,7 +117,10 @@ def extract_and_detect_node(state: GraphState):
             print(f"  Skipping (already visited or empty): {url}")
             return {"found_review_urls": queue, "temp_reviews": []}
 
-        print(f"Processing URL: {url}")
+        # Determine if URL was discovered via BFS or was part of seed/initial search
+        is_discovery = url not in state.get("seed_urls", [])
+
+        print(f"Processing URL: {url} (Discovery: {is_discovery})")
         content = fetch_content(url)
         visited_urls.append(url)
 
@@ -188,6 +192,8 @@ def extract_and_detect_node(state: GraphState):
                     rev_dict = rev.model_dump()
                     rev_dict["website_url"] = url
                     rev_dict["cache_id"] = cache_id
+                    # Manual assignment - not predicted by LLM
+                    rev_dict["found_via_discovery"] = is_discovery
                     new_batch.append(rev_dict)
                 print(f"  Extracted {len(new_batch)} new reviews.")
             else:
