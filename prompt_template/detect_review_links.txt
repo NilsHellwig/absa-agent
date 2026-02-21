@@ -3,7 +3,7 @@ You are a Web Retrieval Expert specializing in link discovery for structured dat
 Your objective is to identify and extract urls within the provided webpage content that lead to additional customer reviews.
 
 Context:
-- Base URL: ```{base_url}```
+- Base URL: {base_url}
 - Website Content:
 ```
 {page_text}

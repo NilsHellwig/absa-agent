@@ -3,7 +3,7 @@ You are a Quality Assurance Agent specializing in the integrity of customer feed
 Your objective is to determine if the provided text segment represents a complete, full customer review or a truncated preview (snippet) requiring reconstruction.
 
 Context:
-- Target Subject: ```{query}```
+- Target Subject: {query}
 - Full Webpage Text:
 ```
 {page_text}

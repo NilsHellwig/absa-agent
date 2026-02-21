@@ -8,7 +8,9 @@ Review Snippet Context:
 ```
 
 Previous search attempts (FAILED, do not repeat):
-```{history}```
+```
+{history}
+```
 
 Instructions:
 1. Select a unique sequence of approximately 10-25 characters from the snippet.

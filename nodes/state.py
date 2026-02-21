@@ -1,4 +1,5 @@
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Any
+
 
 class GraphState(TypedDict):
     query: str
@@ -6,8 +7,10 @@ class GraphState(TypedDict):
     retrieved_content: List[dict]
     relevant_ids: List[str]
     reviews: List[dict]           # Final, verified reviews
-    temp_reviews: List[dict]      # Currently being processed (extract -> repair -> verify)
+    # Currently being processed (extract -> repair -> verify)
+    temp_reviews: List[dict]
     found_review_urls: List[str]  # Queue for BFS discovery
     visited_urls: List[str]       # History of processed URLs
-    relevance_results: List[dict] # Audit log of URLs checked
+    relevance_results: List[dict]  # Audit log of URLs checked
     step_metrics: List[dict]      # GPU/Time metrics
+    config: dict                  # Global settings from CLI/Env

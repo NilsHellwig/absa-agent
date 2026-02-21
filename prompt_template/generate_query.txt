@@ -3,7 +3,7 @@ You are an Information Retrieval Expert specializing in search query optimizatio
 Your objective is to generate a search string for a search engine (e.g., DuckDuckGo) that maximizes the retrieval of diverse customer reviews for the specified subject.
 
 Context:
-- Original User Query: ```{query}```
+- Original User Query: {query}
 
 Instructions:
 1. Generate a broad search query to find pages with restaurant reviews in the specific city.

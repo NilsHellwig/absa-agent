@@ -2,10 +2,7 @@ You are a Structured Feedback Validation Expert.
 
 Your objective is to verify if the provided text is an AUTHENTIC, INDIVIDUALLY-AUTHORED customer review specifically relevant to the research query.
 
-Research Query:
-```
-{query}
-```
+Research Query: {query}
 
 Text to Verify:
 ```
