@@ -8,7 +8,9 @@ from helpers import load_prompt, get_llm, get_cache_path
 from monitor import TrackStep
 from nodes.state import GraphState
 from nodes.models import RepairCheck, RepairSearch, RepairResult
-from const import MAX_REPAIR_CONTEXTS, MAX_REPAIR_CHARS, MAX_SNIPPET_LEN
+from const import (MAX_REPAIR_CONTEXTS, MAX_REPAIR_CHARS, MAX_SNIPPET_LEN,
+                   MAX_REPAIR_ATTEMPTS, REPAIR_SEARCH_DEPTH, REPAIR_CONTEXT_MIN_CHARS,
+                   MIN_REPAIR_LENGTH)
 
 
 def get_contexts_for_term(soup: BeautifulSoup, term: str, max_results: int = MAX_REPAIR_CONTEXTS, max_chars: int = MAX_REPAIR_CHARS) -> List[str]:
@@ -104,14 +106,14 @@ def repair_reviews_node(state: GraphState):
                     repaired_batch.append(rev)
                     continue
 
-            # 2. LOOP: Intelligent Search & Repair (up to 5 attempts)
+            # 2. LOOP: Intelligent Search & Repair (up to constants.MAX_REPAIR_ATTEMPTS attempts)
             print(f"  Repairing snippet: {rev['review_text'][:30]}...")
             current_text = rev["review_text"]
             failed_terms = []
             success = False
 
-            for attempt in range(1, 6):
-                print(f"    - Attempt {attempt}/5...")
+            for attempt in range(1, MAX_REPAIR_ATTEMPTS + 1):
+                print(f"    - Attempt {attempt}/{MAX_REPAIR_ATTEMPTS}...")
 
                 history_str = ", ".join(
                     [f'"{t}"' for t in failed_terms]) if failed_terms else "None"

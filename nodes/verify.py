@@ -24,9 +24,9 @@ def verify_reviews_node(state: GraphState):
         json_schema = json.dumps(
             ReviewVerification.model_json_schema(), indent=2)
 
-        # Dynamic LLM for verification
-        llm = get_llm(config)
-        structured_llm = llm.with_structured_output(ReviewVerification)
+        # Dynamic LLM for verification (using reasoning model)
+        llm_reasoning = get_llm(config, use_reasoning=True)
+        structured_llm = llm_reasoning.with_structured_output(ReviewVerification)
 
         verified_batch = []
         rejected_count = 0

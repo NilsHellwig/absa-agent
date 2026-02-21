@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from langsmith import traceable
 from const import (HTML_CACHE_DIR, CACHE_INDEX_FILE, 
                    MAX_FILTER_SNIPPET, MAX_EXTRACT_SNIPPET, MAX_DETECT_SNIPPET,
-                   DEFAULT_MAX_REVIEWS)
+                   DEFAULT_MAX_REVIEWS, FETCH_TIMEOUT_SECONDS, USER_AGENT_STRING)
 from helpers import load_prompt, get_llm, get_cache_path
 from nodes.state import GraphState
 from nodes.models import PageRelevanceResult, Review, ExtractionResult, ReviewLinksDetection
@@ -70,8 +70,8 @@ def fetch_content(url: str):
 
     print(f"  Fetching {url}...")
     try:
-        res = requests.get(url, timeout=10, headers={
-                           "User-Agent": "Mozilla/5.0"})
+        res = requests.get(url, timeout=FETCH_TIMEOUT_SECONDS, headers={
+                           "User-Agent": USER_AGENT_STRING})
         if res.status_code == 200:
             content = res.text
             with open(cache_path, "w", encoding="utf-8") as f:

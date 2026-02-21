@@ -1,8 +1,8 @@
 from langsmith import traceable
 from helpers import search_wrapper
 from nodes.state import GraphState
-
 from monitor import TrackStep
+from const import DEFAULT_RETRIEVER_MAX_RESULTS
 
 
 @traceable(run_type="retriever")
@@ -13,7 +13,7 @@ def retrieval_node(state: GraphState):
         config = state.get("config", {})
 
         # Retrieval setting from config
-        max_results = config.get("retriever_max_results", 5)
+        max_results = config.get("retriever_max_results", DEFAULT_RETRIEVER_MAX_RESULTS)
 
         results = search_wrapper.results(
             query, max_results=max_results)

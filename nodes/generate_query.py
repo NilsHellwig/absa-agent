@@ -4,9 +4,7 @@ from langchain_ollama import ChatOllama
 from helpers import load_prompt
 from nodes.state import GraphState
 from nodes.models import SearchQuery
-from const import NUM_CTX
-
-from monitor import TrackStep
+from const import NUM_CTX, DEFAULT_LLM_MODEL, DEFAULT_LLM_URL
 
 
 @traceable(run_type="llm")
@@ -22,8 +20,8 @@ def generate_query_node(state: GraphState):
 
         # Dynamic LLM configuration from state
         llm = ChatOllama(
-            model=config.get("llm_model", "gemma3:27b"),
-            base_url=config.get("llm_url", "http://132.199.137.208:11434"),
+            model=config.get("llm_model", DEFAULT_LLM_MODEL),
+            base_url=config.get("llm_url", DEFAULT_LLM_URL),
             temperature=config.get("llm_temperature", 0),
             format="json",
             num_ctx=NUM_CTX
