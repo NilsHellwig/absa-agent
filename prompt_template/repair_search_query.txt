@@ -15,8 +15,7 @@ Previous search attempts (FAILED, do not repeat):
 Instructions:
 1. Select a unique sequence of approximately 10-25 characters from the snippet.
 2. IMPORTANT: The search term must appear EXACTLY as it is written in the 'Review Snippet Context' above, including punctuation and whitespace.
-3. Avoid generic terms or technical noise (e.g., "Read more", "...", "Reviews").
-4. If previous attempts exist, ensure the new candidate is distinct and more specific.
+3. If previous attempts exist, ensure the new candidate is distinct and more specific.
 
 Respond exclusively in JSON format using the provided schema.
 {json_schema}

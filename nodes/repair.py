@@ -50,8 +50,8 @@ def get_contexts_for_term(soup: BeautifulSoup, term: str, max_results: int = MAX
             depth += 1
 
         if parent:
-            contexts.append(parent.get_text(
-                separator="\n", strip=True)[:max_chars])
+            # Return raw HTML as per user request (instead of get_text)
+            contexts.append(str(parent)[:max_chars])
 
     return contexts
 
@@ -155,8 +155,8 @@ def repair_reviews_node(state: GraphState):
 
                 repair_prompt = repair_template.format(
                     query=query,
-                    page_text=context_str,
-                    snippets=f"- {current_text}",
+                    html_segments=context_str,
+                    current_review_text=current_text,
                     json_schema=json.dumps(
                         RepairResult.model_json_schema(), indent=2)
                 )
