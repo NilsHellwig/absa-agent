@@ -2,13 +2,12 @@ from typing import TypedDict, List, Optional
 
 class GraphState(TypedDict):
     query: str
-    max_reviews: int           # Max reviews to extract in total
+    max_reviews: int
     retrieved_content: List[dict]
     relevant_ids: List[str]
-    reviews: List[dict]
-    found_review_urls: List[str] # New: URLs found for reviews
-    visited_urls: List[str]      # New: Keep track to avoid loops
-    relevance_results: List[dict] # New: [{url, is_relevant}]
-    step_metrics: List[dict]      # New: [{step, duration, gpu_wattage_avg}]
-    relevance_results: List[dict] # New: URLs checked and their relevance
-    step_logs: List[dict]         # New: Timing and GPU logs for each step
+    reviews: List[dict]           # Final, verified reviews
+    temp_reviews: List[dict]      # Currently being processed (extract -> repair -> verify)
+    found_review_urls: List[str]  # Queue for BFS discovery
+    visited_urls: List[str]       # History of processed URLs
+    relevance_results: List[dict] # Audit log of URLs checked
+    step_metrics: List[dict]      # GPU/Time metrics

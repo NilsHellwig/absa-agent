@@ -49,10 +49,10 @@ def repair_reviews_node(state: GraphState):
     with TrackStep("Repair") as tracker:
         print("--- INTELLIGENT REPAIR AGENT (5-Attempt Loop) ---")
         query = state["query"]
-        original_reviews = state.get("reviews", [])
+        temp_reviews = state.get("temp_reviews", [])
         
-        if not original_reviews:
-            return {"reviews": []}
+        if not temp_reviews:
+            return {"temp_reviews": []}
         
         check_template = load_prompt("review_completeness.txt")
         search_template = load_prompt("repair_search_query.txt")
@@ -62,16 +62,16 @@ def repair_reviews_node(state: GraphState):
         search_llm = llm.with_structured_output(RepairSearch)
         repair_llm = llm.with_structured_output(RepairResult)
         
-        final_reviews = []
+        repaired_batch = []
         repaired_count = 0
         discarded_count = 0
         
-        for rev in original_reviews:
+        for rev in temp_reviews:
             url = rev.get("website_url")
             cache_path = get_cache_path(url)
             
             if not os.path.exists(cache_path):
-                final_reviews.append(rev)
+                repaired_batch.append(rev)
                 continue
                 
             with open(cache_path, "r", encoding="utf-8") as f:
@@ -83,8 +83,6 @@ def repair_reviews_node(state: GraphState):
                     element.decompose()
                 
             # 1. CHECK: Is it incomplete?
-            # Provide a slice of the page text as initial context for the checker
-            # Using \n for better structure in the prompt
             page_snippet = soup.get_text(separator="\n", strip=True)[:15000]
             check_prompt = check_template.format(
                 query=query,
@@ -96,12 +94,11 @@ def repair_reviews_node(state: GraphState):
             try:
                 check_res = check_llm.invoke(check_prompt, config={"run_name": "Check-Review-Completeness"})
                 if not check_res.is_incomplete:
-                    final_reviews.append(rev)
+                    repaired_batch.append(rev)
                     continue
             except Exception:
-                # Fallback for simple snippet check
                 if "..." not in rev["review_text"] and len(rev["review_text"]) > 150:
-                    final_reviews.append(rev)
+                    repaired_batch.append(rev)
                     continue
 
             # 2. LOOP: Intelligent Search & Repair (up to 5 attempts)
@@ -113,7 +110,6 @@ def repair_reviews_node(state: GraphState):
             for attempt in range(1, 6):
                 print(f"    - Attempt {attempt}/5...")
                 
-                # Suggest a search term from the current snippet
                 history_str = ", ".join([f'"{t}"' for t in failed_terms]) if failed_terms else "None"
                 search_prompt = search_template.format(
                     review_text=current_text,
@@ -123,16 +119,13 @@ def repair_reviews_node(state: GraphState):
                 search_res = search_llm.invoke(search_prompt, config={"run_name": f"Search-Attempt-{attempt}"})
                 term = search_res.search_term
                 
-                # Seek in HTML
                 context = get_context_for_term(soup, term)
                 
                 if not context:
-                    # If term not found, try a different approach or skip to next attempt
                     print(f"      [Search Term '{term}' not found in HTML]")
                     failed_terms.append(term)
                     continue
                     
-                # Repair Attempt
                 repair_prompt = repair_template.format(
                     query=query,
                     page_text=context,
@@ -146,7 +139,7 @@ def repair_reviews_node(state: GraphState):
                     
                     if repair_res.is_complete:
                         rev["review_text"] = current_text
-                        final_reviews.append(rev)
+                        repaired_batch.append(rev)
                         repaired_count += 1
                         success = True
                         print(f"      [SUCCESS] Review repaired on attempt {attempt}.")
@@ -160,9 +153,9 @@ def repair_reviews_node(state: GraphState):
                 discarded_count += 1
                 print(f"    - [DISCARDED] Could not repair after 5 attempts.")
 
-        print(f"\nFinal Repair results: {repaired_count} repaired, {discarded_count} discarded, {len(final_reviews)} kept.")
+        print(f"\nFinal Repair results: {repaired_count} repaired, {discarded_count} discarded, {len(repaired_batch)} kept.")
         
     metrics = state.get("step_metrics", [])
     metrics.append(tracker.result)
     
-    return {"reviews": final_reviews, "step_metrics": metrics}
+    return {"temp_reviews": repaired_batch, "step_metrics": metrics}

@@ -103,121 +103,110 @@ def extract_and_detect_node(state: GraphState):
         print("--- EXTRACT AND DETECT ---")
         query = state["query"]
         max_reviews = state.get("max_reviews", 50)
-        relevant_ids = state.get("relevant_ids", [])
-        results = state.get("retrieved_content", [])
-        
-        # We maintain a queue and a visited set
-        initial_urls = [r['link'] for r in results if r['id'] in relevant_ids]
-        queue = list(initial_urls)
-        visited_urls = state.get("visited_urls", []) or []
-        all_found_urls = state.get("found_review_urls", []) or []
         all_reviews = state.get("reviews", []) or []
+        
+        if len(all_reviews) >= max_reviews:
+            print(f"  [LIMIT] Already reached {len(all_reviews)}/{max_reviews}. Stopping.")
+            return {"temp_reviews": [], "found_review_urls": []} # Clear queue to stop graph
+
+        # We process ONE URL from the queue
+        queue = state.get("found_review_urls", [])
+        visited_urls = state.get("visited_urls", []) or []
         relevance_results = state.get("relevance_results", []) or []
         
-        # Templates
-        extract_template = load_prompt("extract_reviews.txt")
-        detect_template = load_prompt("detect_review_links.txt")
-        filter_page_template = load_prompt("filter_page.txt")
-        
-        extract_schema = json.dumps(ExtractionResult.model_json_schema(), indent=2)
-        detect_schema = json.dumps(ReviewLinksDetection.model_json_schema(), indent=2)
-        filter_page_schema = json.dumps(PageRelevanceResult.model_json_schema(), indent=2)
-        
-        structured_llm_extract = llm.with_structured_output(ExtractionResult)
-        structured_llm_detect = llm.with_structured_output(ReviewLinksDetection)
-        structured_llm_filter = llm_reasoning.with_structured_output(PageRelevanceResult)
-        
-        # Current candidates
-        candidates = list(set(queue + all_found_urls))
-        to_check = [u for u in candidates if u and u.startswith('http') and u not in visited_urls]
+        # If queue is empty, we are done
+        if not queue:
+            print("  Queue is empty. Moving on.")
+            return {"temp_reviews": []}
 
-        while to_check and len(all_reviews) < max_reviews:
-            url = to_check.pop(0)
-            if not url or url in visited_urls:
-                continue
-                
-            is_pagi = url not in initial_urls
-            print(f"Processing (Discovery={is_pagi}): {url}")
+        url = queue.pop(0)
+        if not url or url in visited_urls:
+            print(f"  Skipping (already visited or empty): {url}")
+            return {"found_review_urls": queue, "temp_reviews": []}
             
-            content = fetch_content(url)
-            visited_urls.append(url)
-                
-            if content:
-                # Save cache id
-                cache_path = get_cache_path(url)
-                cache_id = os.path.basename(cache_path)
+        print(f"Processing URL: {url}")
+        content = fetch_content(url)
+        visited_urls.append(url)
+            
+        new_batch = []
+        updated_queue = list(queue)
 
-                soup = BeautifulSoup(content, "html.parser")
-                
-                # Remove noise elements to clean the text
-                removed_tags = ["script", "style", "header", "footer", "nav", "aside", "iframe", "svg"]
-                for element in soup(removed_tags):
-                    element.decompose()
-                    
-                # Use newline separator to preserve basic visual structure
-                page_text = soup.get_text(separator="\n", strip=True)
-                
-                # 0. Check Page Relevance (NEW)
-                print("  Checking page relevance...")
-                filter_prompt = filter_page_template.format(query=query, page_snippet=page_text[:30000], json_schema=filter_page_schema)
-                try:
-                    relevance_response = structured_llm_filter.invoke(filter_prompt, config={"run_name": "Check-Page-Relevance"})
-                    is_rel = relevance_response and relevance_response.is_relevant
-                    relevance_results.append({"url": url, "is_relevant": is_rel, "cache_id": cache_id})
-                    
-                    if not is_rel:
-                        print(f"  [PAGE NOT RELEVANT] Skipping: {url}")
-                        continue
-                    print("  [PAGE RELEVANT] Proceeding with extraction...")
-                except Exception as e:
-                    print(f"  Warning: Page relevance check failed for {url}: {e}. Proceeding anyway.")
-                
-                # 1. Extract Reviews
-                print("  Extracting reviews...")
-                extract_prompt = extract_template.format(page_text=page_text[:40000], json_schema=extract_schema)
-                extract_response = structured_llm_extract.invoke(extract_prompt, config={"run_name": "Extract-Reviews"})
-                if extract_response and extract_response.reviews:
-                    for rev in extract_response.reviews:
-                        if len(all_reviews) >= max_reviews:
-                            break
-                        rev_dict = rev.model_dump()
-                        rev_dict["website_url"] = url
-                        rev_dict["cache_id"] = cache_id
-                        rev_dict["found_via_discovery"] = is_pagi
-                        all_reviews.append(rev_dict)
-                    print(f"  Found {len(extract_response.reviews)} reviews (Total: {len(all_reviews)}).")
-                else:
-                    print("  No reviews extracted or LLM failed.")
-                
-                if len(all_reviews) >= max_reviews:
-                    print(f"  Reached max reviews limit ({max_reviews}). Stopping discovery.")
-                    break
+        if content:
+            # Save cache id
+            cache_path = get_cache_path(url)
+            cache_id = os.path.basename(cache_path)
 
-                # 2. Detect Links (for discovery)
-                print("  Detecting links...")
-                detect_prompt = detect_template.format(page_text=page_text[:30000], base_url=url, json_schema=detect_schema)
-                detect_response = structured_llm_detect.invoke(detect_prompt, config={"run_name": "Discover-Review-Links"})
+            soup = BeautifulSoup(content, "html.parser")
+            
+            removed_tags = ["script", "style", "header", "footer", "nav", "aside", "iframe", "svg"]
+            for element in soup(removed_tags):
+                element.decompose()
                 
-                if detect_response and detect_response.urls:
-                    new_links = []
-                    for l in detect_response.urls:
-                        if not l: continue
-                        full_url = urljoin(url, l)
-                        if full_url.startswith('http') and full_url not in visited_urls and full_url not in to_check:
-                            new_links.append(full_url)
-                    
-                    to_check.extend(new_links)
-                    all_found_urls.extend(new_links)
-                    print(f"  Found {len(new_links)} new links.")
-                else:
-                    print("  No new links discovered.")
-        
+            page_text = soup.get_text(separator="\n", strip=True)
+            
+            # Templates & LLM
+            filter_page_template = load_prompt("filter_page.txt")
+            filter_page_schema = json.dumps(PageRelevanceResult.model_json_schema(), indent=2)
+            structured_llm_filter = llm_reasoning.with_structured_output(PageRelevanceResult)
+
+            # 0. Check Page Relevance
+            print("  Checking page relevance...")
+            filter_prompt = filter_page_template.format(query=query, page_snippet=page_text[:30000], json_schema=filter_page_schema)
+            try:
+                relevance_response = structured_llm_filter.invoke(filter_prompt, config={"run_name": "Check-Page-Relevance"})
+                is_rel = relevance_response and relevance_response.is_relevant
+                relevance_results.append({"url": url, "is_relevant": is_rel, "cache_id": cache_id})
+                
+                if not is_rel:
+                    print(f"  [PAGE NOT RELEVANT] Skipping: {url}")
+                    return {"found_review_urls": updated_queue, "visited_urls": visited_urls, "relevance_results": relevance_results, "temp_reviews": []}
+                print("  [PAGE RELEVANT] Proceeding...")
+            except Exception as e:
+                print(f"  Warning: Relevance check failed: {e}. Proceeding.")
+                relevance_results.append({"url": url, "is_relevant": True, "cache_id": cache_id})
+
+            # 1. Extract Reviews
+            extract_template = load_prompt("extract_reviews.txt")
+            extract_schema = json.dumps(ExtractionResult.model_json_schema(), indent=2)
+            structured_llm_extract = llm.with_structured_output(ExtractionResult)
+
+            print("  Extracting reviews...")
+            extract_prompt = extract_template.format(page_text=page_text[:40000], json_schema=extract_schema)
+            extract_response = structured_llm_extract.invoke(extract_prompt, config={"run_name": "Extract-Reviews"})
+            
+            if extract_response and extract_response.reviews:
+                for rev in extract_response.reviews:
+                    rev_dict = rev.model_dump()
+                    rev_dict["website_url"] = url
+                    rev_dict["cache_id"] = cache_id
+                    new_batch.append(rev_dict)
+                print(f"  Extracted {len(new_batch)} new reviews.")
+            else:
+                print("  No reviews found on this page.")
+
+            # 2. Detect Links (for discovery)
+            detect_template = load_prompt("detect_review_links.txt")
+            detect_schema = json.dumps(ReviewLinksDetection.model_json_schema(), indent=2)
+            structured_llm_detect = llm.with_structured_output(ReviewLinksDetection)
+
+            print("  Detecting links...")
+            detect_prompt = detect_template.format(page_text=page_text[:30000], base_url=url, json_schema=detect_schema)
+            detect_response = structured_llm_detect.invoke(detect_prompt, config={"run_name": "Discover-Review-Links"})
+            
+            if detect_response and detect_response.urls:
+                for l in detect_response.urls:
+                    if not l: continue
+                    full_url = urljoin(url, l)
+                    if full_url.startswith('http') and full_url not in visited_urls and full_url not in updated_queue:
+                        updated_queue.append(full_url)
+                print(f"  Updated queue size: {len(updated_queue)}")
+
     metrics = state.get("step_metrics", [])
     metrics.append(tracker.result)
     
     return {
-        "reviews": all_reviews, 
-        "found_review_urls": list(set(all_found_urls)), 
+        "temp_reviews": new_batch,
+        "found_review_urls": updated_queue,
         "visited_urls": visited_urls,
         "relevance_results": relevance_results,
         "step_metrics": metrics

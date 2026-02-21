@@ -18,17 +18,55 @@ def create_graph():
     # Adding nodes
     workflow.add_node("generate_query", generate_query_node)
     workflow.add_node("retrieval", retrieval_node)
-    workflow.add_node("extract_and_detect", extract_and_detect_node)
+    workflow.add_node("extract", extract_and_detect_node)
     workflow.add_node("repair", repair_reviews_node)
     workflow.add_node("verify", verify_reviews_node)
 
-    # Simplified flow
+    # Entry
     workflow.set_entry_point("generate_query")
     workflow.add_edge("generate_query", "retrieval")
-    workflow.add_edge("retrieval", "extract_and_detect")
-    workflow.add_edge("extract_and_detect", "repair")
+    workflow.add_edge("retrieval", "extract")
+    
+    # Check if we have something to repair/verify
+    def check_extraction_results(state: GraphState):
+        if not state.get("temp_reviews"):
+            return "skip_to_router"
+        return "process_reviews"
+
+    workflow.add_conditional_edges(
+        "extract",
+        check_extraction_results,
+        {
+            "process_reviews": "repair",
+            "skip_to_router": "verify" # We go to verify node because it handles merging (even if empty)
+        }
+    )
+    
     workflow.add_edge("repair", "verify")
-    workflow.add_edge("verify", END)
+    
+    # Logic to continue or stop
+    def router(state: GraphState):
+        current_count = len(state.get("reviews", []))
+        max_req = state.get("max_reviews", 50)
+        
+        if current_count >= max_req:
+            print(f"--- LIMIT REACHED ({current_count}/{max_req}). STOPPING. ---")
+            return END
+            
+        if not state.get("found_review_urls"):
+            print("--- QUEUE EMPTY. STOPPING. ---")
+            return END
+            
+        return "continue"
+
+    workflow.add_conditional_edges(
+        "verify",
+        router,
+        {
+            "continue": "extract",
+            END: END
+        }
+    )
     
     return workflow.compile()
 
@@ -87,6 +125,7 @@ def main():
         "retrieved_content": [],
         "relevant_ids": [],
         "reviews": [],
+        "temp_reviews": [],
         "found_review_urls": [],
         "visited_urls": [],
         "relevance_results": [],

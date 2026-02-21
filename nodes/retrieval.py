@@ -19,12 +19,19 @@ def retrieval_node(state: GraphState):
         print(f"Remaining after filter: {len(filtered_results)}")
         
         relevant_ids = []
+        initial_urls = []
         for idx, result in enumerate(filtered_results):
             rid = f"result_{idx+1}"
             result["id"] = rid
             relevant_ids.append(rid)
+            initial_urls.append(result["link"])
     
     metrics = state.get("step_metrics", [])
     metrics.append(tracker.result)
     
-    return {"retrieved_content": filtered_results, "relevant_ids": relevant_ids, "step_metrics": metrics}
+    return {
+        "retrieved_content": filtered_results, 
+        "relevant_ids": relevant_ids, 
+        "found_review_urls": initial_urls,
+        "step_metrics": metrics
+    }
