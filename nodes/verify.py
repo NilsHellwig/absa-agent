@@ -20,7 +20,7 @@ def verify_reviews_node(state: GraphState):
         if not temp_reviews:
             return {"temp_reviews": []}
 
-        template = load_prompt("verify_reviews.txt")
+        template = load_prompt("verify_reviews.md")
         json_schema = json.dumps(
             ReviewVerification.model_json_schema(), indent=2)
 

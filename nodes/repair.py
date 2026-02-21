@@ -50,9 +50,9 @@ def repair_reviews_node(state: GraphState):
         if not temp_reviews:
             return {"temp_reviews": []}
 
-        check_template = load_prompt("review_completeness.txt")
-        search_template = load_prompt("repair_search_query.txt")
-        repair_template = load_prompt("repair_review.txt")
+        check_template = load_prompt("review_completeness.md")
+        search_template = load_prompt("repair_search_query.md")
+        repair_template = load_prompt("repair_review.md")
 
         # Dynamic LLMs
         llm = get_llm(config)
