@@ -2,30 +2,13 @@ import json
 import os
 import re
 from typing import List, Optional
-from pydantic import BaseModel, Field
 from bs4 import BeautifulSoup
 from langsmith import traceable
 from helpers import load_prompt, get_llm, get_cache_path
 from monitor import TrackStep
 from nodes.state import GraphState
+from nodes.models import RepairCheck, RepairSearch, RepairResult
 from const import MAX_REPAIR_CONTEXTS, MAX_REPAIR_CHARS, MAX_SNIPPET_LEN
-
-
-class RepairCheck(BaseModel):
-    is_incomplete: bool = Field(
-        description="True if the review is truncated/a snippet and needs reconstruction from HTML source, False if it is complete. Possible values: [true, false]")
-
-
-class RepairSearch(BaseModel):
-    search_term: str = Field(
-        description="A unique and representative sequence of characters (a substring) from the review snippet to locate its position in the HTML source code.")
-
-
-class RepairResult(BaseModel):
-    fixed_text: str = Field(
-        description="The reconstructed original full text (verbatim) from the webpage source.")
-    is_complete: bool = Field(
-        description="True if the text is successfully reconstructed and complete, False if it remain truncated. Possible values: [true, false]")
 
 
 def get_contexts_for_term(soup: BeautifulSoup, term: str, max_results: int = MAX_REPAIR_CONTEXTS, max_chars: int = MAX_REPAIR_CHARS) -> List[str]:

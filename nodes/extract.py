@@ -3,16 +3,14 @@ import os
 import json
 import requests
 from typing import List, Optional
-from pydantic import BaseModel, Field
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from langsmith import traceable
-from const import (HTML_CACHE_DIR, CACHE_INDEX_FILE,
+from const import (HTML_CACHE_DIR, CACHE_INDEX_FILE, 
                    MAX_FILTER_SNIPPET, MAX_EXTRACT_SNIPPET, MAX_DETECT_SNIPPET)
 from helpers import load_prompt, get_llm, get_cache_path
 from nodes.state import GraphState
-
-# In-memory dictionary to speed up URL checks within a run
+from nodes.models import PageRelevanceResult, Review, ExtractionResult, ReviewLinksDetection
 url_cache = {}
 global_cache_index = None
 
@@ -41,11 +39,6 @@ def save_to_cache_index(url: str, filename: str):
     index[url] = filename
     with open(CACHE_INDEX_FILE, "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2)
-
-
-class PageRelevanceResult(BaseModel):
-    is_relevant: bool = Field(
-        description="True if the webpage is highly relevant to the research query (e.g. contains actual reviews), False if it is a generic page or irrelevant. Possible values: [true, false]")
 
 
 def fetch_content(url: str):
@@ -91,26 +84,6 @@ def fetch_content(url: str):
     except Exception as e:
         print(f"  Error fetching {url}: {e}")
     return None
-
-
-class Review(BaseModel):
-    review_title: Optional[str] = Field(
-        description="Title of the review", default=None)
-    review_text: str = Field(description="Content of the review")
-    stars: Optional[int] = Field(
-        description="Star rating (usually 1-5)", default=None)
-    found_via_discovery: bool = Field(
-        description="True if the review was found on a discovered link (BFS), False if from initial search results. Possible values: [true, false]", default=False)
-
-
-class ExtractionResult(BaseModel):
-    reviews: List[Review] = Field(
-        description="List of extracted reviews from the current page content")
-
-
-class ReviewLinksDetection(BaseModel):
-    urls: List[str] = Field(
-        description="List of detected absolute or relative URLs that likely lead to more reviews (e.g. pagination or 'read more' links)")
 
 
 @traceable(run_type="chain", name="Extract-and-Discover Node")

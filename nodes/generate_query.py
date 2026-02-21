@@ -1,17 +1,12 @@
 import json
-from pydantic import BaseModel, Field
 from langsmith import traceable
 from langchain_ollama import ChatOllama
 from helpers import load_prompt
 from nodes.state import GraphState
+from nodes.models import SearchQuery
 from const import NUM_CTX
 
 from monitor import TrackStep
-
-
-class SearchQuery(BaseModel):
-    optimized_query: str = Field(
-        description="A concise and highly effective keyword-based search query formulated to find relevant review pages for the given research topic.")
 
 
 @traceable(run_type="llm")

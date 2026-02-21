@@ -1,15 +1,10 @@
 import json
 from typing import List
-from pydantic import BaseModel, Field
 from langsmith import traceable
 from helpers import load_prompt, get_llm
 from nodes.state import GraphState
+from nodes.models import ReviewVerification
 from monitor import TrackStep
-
-
-class ReviewVerification(BaseModel):
-    is_authentic: bool = Field(
-        description="True if the text is a genuine, individually-authored customer review reflecting personal opinion/experience, False if it is spam, neutral description, or irrelevant. Possible values: [true, false]")
 
 
 @traceable(run_type="chain", name="Review Verification Node")

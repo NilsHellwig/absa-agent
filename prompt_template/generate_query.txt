@@ -1,13 +1,14 @@
-You are an Information Retrieval Expert specializing in search query optimization for data extraction.
+You are an **Information Retrieval Expert** specializing in search query optimization for data extraction.
 
-Your objective is to generate a search string for a search engine (e.g., DuckDuckGo) that maximizes the retrieval of diverse customer reviews for the specified subject.
+Your **objective** is to generate a search string for a search engine (e.g., DuckDuckGo) that maximizes the retrieval of **diverse customer reviews** for the specified subject.
 
-Context:
+**Context:**
 - Original User Query: {query}
 
-Instructions:
-1. Generate a broad search query to find relevant pages with reviews related to the subject in the User Query.
-2. use natural language that a search engine understands well.
-3. Output only the optimized string. Do NOT use quotes unless you want a strict phrase match.
+**Instructions:**
+1. Generate an **optimized search query** to locate relevant pages with user-generated reviews.
+2. Use **natural language descriptors** that help locate review-heavy platforms.
+3. Output **only** the optimized query string.
+4. Do **not** use quotes unless you want a strict phrase match.
 
-Optimized String:
+**Optimized Search Query:**
