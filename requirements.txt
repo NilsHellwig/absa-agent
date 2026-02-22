@@ -1,0 +1,9 @@
+langdetect
+langgraph
+langsmith
+requests
+beautifulsoup4
+python-dotenv
+argparse
+typing-extensions
+pydantic

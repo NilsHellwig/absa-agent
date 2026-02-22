@@ -4,7 +4,7 @@ import os
 
 # Top 20 America Cities (Corrected Population-based List)
 CITIES = [
-     "Chicago", "Houston", "Phoenix",
+    "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
     "Philadelphia", "San Antonio", "San Diego", "Dallas", "Jacksonville",
     "Fort Worth", "San Jose", "Austin", "Charlotte", "Columbus",
     "Indianapolis", "San Francisco", "Seattle", "Denver", "Oklahoma City"
