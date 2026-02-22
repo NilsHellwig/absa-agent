@@ -16,6 +16,7 @@ Your **objective** is to identify and extract individually-authored customer rev
 2. **Ignore** navigation links, metadata sidebars, and commercial advertisements. 
 3. If a review appears **truncated** (e.g., ends with "..."), extract the partial narrative as a **snippet** for later reconstruction.
 4. Each extracted review must correspond to a **distinct user entry** on the original page.
+5. Ignore HTML tags and formatting: Extract only the **plain text** content of the reviews.
 
 **Respond exclusively in JSON format** using the provided schema:
 {json_schema}

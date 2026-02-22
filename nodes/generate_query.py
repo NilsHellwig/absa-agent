@@ -1,6 +1,7 @@
 import json
 from langsmith import traceable
 from langchain_ollama import ChatOllama
+from monitor import TrackStep
 from helpers import load_prompt
 from nodes.state import GraphState
 from nodes.models import SearchQuery
@@ -28,12 +29,15 @@ def generate_query_node(state: GraphState):
         )
 
         structured_llm = llm.with_structured_output(SearchQuery)
-        response = structured_llm.invoke(prompt)
-
-        refined_query = response.optimized_query
-
-        # Remove any unwanted quotes if LLM produced them inside the JSON string
-        refined_query = refined_query.replace('"', '').replace("'", "")
+        
+        try:
+            response = structured_llm.invoke(prompt)
+            refined_query = response.optimized_query
+            # Remove any unwanted quotes if LLM produced them inside the JSON string
+            refined_query = refined_query.replace('"', '').replace("'", "")
+        except Exception as e:
+            print(f"  [REFINEMENT ERROR] LLM failed: {e}. Falling back to original query.")
+            refined_query = query
 
         print(f"Optimized Query: {refined_query}")
 

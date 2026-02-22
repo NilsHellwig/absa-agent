@@ -18,7 +18,7 @@ DEFAULT_MAX_REVIEWS = 50
 # Default language for reviews (e.g. 'en', 'de'). Set to None to disable filtering.
 DEFAULT_LANGUAGE = "en"
 # Initial amount of search results requested by the 'Retrieval' node
-DEFAULT_RETRIEVER_MAX_RESULTS = 50
+DEFAULT_RETRIEVER_MAX_RESULTS = 100
 
 # --- Caching & Storage ---
 # Directory where raw HTML content is persisted to avoid redundant fetching
@@ -29,8 +29,10 @@ CACHE_INDEX_FILE = os.path.join(HTML_CACHE_DIR, "cache_index.json")
 # --- Character Limits for LLM Context Windows ---
 # Max number of HTML fragments sent to the 'Repair' node to prevent context overflow
 MAX_REPAIR_CONTEXTS = 5
-# Max total characters allowed for repair context snippets
-MAX_REPAIR_CHARS = 5000
+# Max total characters allowed for ALL repair context snippets combined
+MAX_REPAIR_TOTAL_CHARS = 20000
+# Max characters for a single repair context snippet
+MAX_REPAIR_CHARS = 10000
 # Max text length passed to the Intelligent Repair 'Check' phase
 MAX_SNIPPET_LEN = 15000
 # Text sample size used by the 'Extract' node to determine if a page is relevant

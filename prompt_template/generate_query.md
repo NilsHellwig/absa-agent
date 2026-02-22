@@ -10,5 +10,6 @@ Your **objective** is to generate a search string for a search engine (e.g., Duc
 2. Use **natural language descriptors** that help locate review-heavy platforms.
 3. Output **only** the optimized query string.
 4. Do **not** use quotes unless you want a strict phrase match.
+5. Do **not** include specific platform names unless it is reqesuested.
 
 **Optimized Search Query:**

@@ -18,6 +18,7 @@ Your **objective** is to replace the provided truncated review snippet with the 
 1. Examine all provided **segments** in the block above.
 2. Locate the **full narrative** that matches the truncated snippet.
 3. Extract the full narrative **verbatim** and provide it as `fixed_text`.
+4. **Text only**: Do not consider metadata, author names, dates, star ratings, or category scores when assessing completeness. Extract only the textual content of the review.
 4. **Verbatim requirement:** The `fixed_text` must be present in the provided HTML segments. Do **not** invent, paraphrase, or hallucinate content.
 5. **Exclude metadata:** Supply **only** the feedback narrative. Do **not** include author names, dates, star ratings, or category scores.
 6. If the reconstructed text is a **complete** original review, set `is_complete: true`.

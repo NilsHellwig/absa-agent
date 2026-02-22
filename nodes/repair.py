@@ -8,9 +8,9 @@ from helpers import load_prompt, get_llm, get_cache_path
 from monitor import TrackStep
 from nodes.state import GraphState
 from nodes.models import RepairCheck, RepairSearch, RepairResult
-from const import (MAX_REPAIR_CONTEXTS, MAX_REPAIR_CHARS, MAX_SNIPPET_LEN,
-                   MAX_REPAIR_ATTEMPTS, REPAIR_SEARCH_DEPTH, REPAIR_CONTEXT_MIN_CHARS,
-                   MIN_REPAIR_LENGTH)
+from const import (MAX_REPAIR_CONTEXTS, MAX_REPAIR_CHARS, MAX_REPAIR_TOTAL_CHARS,
+                   MAX_SNIPPET_LEN, MAX_REPAIR_ATTEMPTS, REPAIR_SEARCH_DEPTH,
+                   REPAIR_CONTEXT_MIN_CHARS, MIN_REPAIR_LENGTH)
 
 
 def get_contexts_for_term(soup: BeautifulSoup, term: str, max_results: int = MAX_REPAIR_CONTEXTS, max_chars: int = MAX_REPAIR_CHARS) -> List[str]:
@@ -134,9 +134,19 @@ def repair_reviews_node(state: GraphState):
                     failed_terms.append(term)
                     continue
 
-                # Pass all identified contexts to the LLM (Up to 5)
+                # Filter contexts to respect total character limit
+                filtered_contexts = []
+                total_chars = 0
+                for ctx in contexts:
+                    if total_chars + len(ctx) > MAX_REPAIR_TOTAL_CHARS:
+                        print(f"      Total limit ({MAX_REPAIR_TOTAL_CHARS}) reached. Skipping remaining contexts.")
+                        break
+                    filtered_contexts.append(ctx)
+                    total_chars += len(ctx)
+
+                # Use filtered contexts (Up to MAX_REPAIR_CONTEXTS)
                 context_str = "\n---\n".join(
-                    [f"Source Segment {i+1}:\n{ctx}" for i, ctx in enumerate(contexts)])
+                    [f"Source Segment {i+1}:\n{ctx}" for i, ctx in enumerate(filtered_contexts)])
 
                 repair_prompt = repair_template.format(
                     query=query,

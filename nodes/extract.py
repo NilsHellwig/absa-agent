@@ -117,6 +117,14 @@ def extract_and_detect_node(state: GraphState):
             print(f"  Skipping (already visited or empty): {url}")
             return {"found_review_urls": queue, "temp_reviews": []}
 
+        # Safety check for forbidden URLs
+        forbidden_urls = [f.lower().strip() for f in config.get("forbidden_urls", [])]
+        if any(forbidden in url.lower() for forbidden in forbidden_urls if forbidden):
+            print(f"  [FORBIDDEN] Skip forbidden URL: {url}")
+            # Mark it as visited to avoid redundant checks
+            new_visited = visited_urls + [url]
+            return {"found_review_urls": queue, "visited_urls": new_visited, "temp_reviews": []}
+
         # Determine if URL was discovered via BFS or was part of seed/initial search
         is_discovery = url not in state.get("seed_urls", [])
 
@@ -224,7 +232,9 @@ def extract_and_detect_node(state: GraphState):
                             continue
                         full_url = urljoin(url, l)
                         if full_url.startswith('http') and full_url not in visited_urls and full_url not in updated_queue:
-                            updated_queue.append(full_url)
+                            # Respect forbidden URLs
+                            if not any(f in full_url.lower() for f in forbidden_urls):
+                                updated_queue.append(full_url)
                     print(f"  Updated queue size: {len(updated_queue)}")
 
     metrics = state.get("step_metrics", [])

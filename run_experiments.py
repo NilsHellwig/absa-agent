@@ -4,7 +4,7 @@ import os
 
 # Top 20 America Cities (Corrected Population-based List)
 CITIES = [
-    "New York", "Los Angeles", "Chicago", "Houston", "Phoenix",
+     "Chicago", "Houston", "Phoenix",
     "Philadelphia", "San Antonio", "San Diego", "Dallas", "Jacksonville",
     "Fort Worth", "San Jose", "Austin", "Charlotte", "Columbus",
     "Indianapolis", "San Francisco", "Seattle", "Denver", "Oklahoma City"
@@ -19,14 +19,19 @@ def run_experiment(city):
     # Define the topic
     topic = f"Restaurants in {city}"
     
+    # Generate session ID
+    session_id = f"restaurants_{city.lower().replace(' ', '_')}"
+    
     # Define the command
     # Using sys.executable to ensure we use the same environment
     cmd = [
         sys.executable, 
         "absa_agent.py", 
         topic,
+        "--id", session_id,
         "--max_reviews", "50",  # 50 reviews per experiment
-        "--language", "en"      # Explicitly English
+        "--language", "en",      # Explicitly English
+        "--forbidden_urls", "opentable.com"
     ]
     
     try:

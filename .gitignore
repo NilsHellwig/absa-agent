@@ -3,3 +3,4 @@ _html/
 .env
 __pycache__/
 _html_cache/
+results/

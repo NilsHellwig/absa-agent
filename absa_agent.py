@@ -28,6 +28,7 @@ DEFAULT_CONFIG = {
     "retriever_max_results": int(os.getenv("RETRIEVER_MAX_RESULTS", DEFAULT_RETRIEVER_MAX_RESULTS)),
     "max_reviews": int(os.getenv("MAX_REVIEWS", DEFAULT_MAX_REVIEWS)),
     "language": os.getenv("LANGUAGE", DEFAULT_LANGUAGE),
+    "forbidden_urls": ["opentable.com"],
     "skip_reformulation": False,
     "initial_urls": [],
     "disable_discovery": False
@@ -111,7 +112,7 @@ def save_results(state, session_id):
     relevance_results = state.get("relevance_results", [])
     step_metrics = state.get("step_metrics", [])
 
-    folder_path = f"results/results_{session_id}"
+    folder_path = f"results/{session_id}"
 
     # Structure of the output matches the previous version but uses save_json helper
     save_json({
@@ -141,6 +142,8 @@ def main():
                         help="Language filter for reviews (e.g. 'en', 'de'). Set to None to disable.")
     parser.add_argument(
         "--urls", nargs="+", help="Seed URLs to start with (bypasses search engine)", default=[])
+    parser.add_argument(
+        "--forbidden_urls", nargs="+", help="Domains to exclude from search results", default=[])
     parser.add_argument("--skip_refinement", action="store_true",
                         help="Skip LLM query reformulation step")
     parser.add_argument("--disable_discovery", action="store_true",
@@ -160,6 +163,8 @@ def main():
         config["language"] = args.language
     if args.urls:
         config["initial_urls"] = args.urls
+    if args.forbidden_urls:
+        config["forbidden_urls"] = args.forbidden_urls
     if args.skip_refinement:
         config["skip_reformulation"] = True
     if args.disable_discovery:
