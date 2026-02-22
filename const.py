@@ -15,6 +15,8 @@ DEFAULT_REASONING_MODEL = "gpt-oss:20b"
 DEFAULT_TEMPERATURE = 0.0
 # Target number of reviews to collect before stopping (unless queue is empty)
 DEFAULT_MAX_REVIEWS = 50
+# Default language for reviews (e.g. 'en', 'de'). Set to None to disable filtering.
+DEFAULT_LANGUAGE = "en"
 # Initial amount of search results requested by the 'Retrieval' node
 DEFAULT_RETRIEVER_MAX_RESULTS = 50
 

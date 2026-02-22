@@ -1,5 +1,6 @@
 import json
 from typing import List
+from langdetect import detect
 from langsmith import traceable
 from helpers import load_prompt, get_llm
 from nodes.state import GraphState
@@ -53,6 +54,26 @@ def verify_reviews_node(state: GraphState):
 
         print(
             f"\nFinal Verification results: {len(verified_batch)} authentic, {rejected_count} rejected.")
+
+    # --- Language Filtering ---
+    target_lang = config.get("language")
+    if target_lang and target_lang.lower() != "none":
+        lang_filtered_batch = []
+        lang_rejected_count = 0
+        for rev in verified_batch:
+            try:
+                detected = detect(rev["review_text"])
+                if detected == target_lang:
+                    lang_filtered_batch.append(rev)
+                else:
+                    lang_rejected_count += 1
+            except:
+                # If detection fails, we skip it to be safe
+                lang_rejected_count += 1
+        
+        if lang_rejected_count > 0:
+            print(f"  [LANGUAGE] Rejected {lang_rejected_count} reviews not matching '{target_lang}'.")
+        verified_batch = lang_filtered_batch
 
     # Merge verified batch into global reviews (Respecting limit precisely)
     config = state.get("config", {})

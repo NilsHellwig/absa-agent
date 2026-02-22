@@ -12,7 +12,7 @@ from nodes.repair import repair_reviews_node
 from nodes.verify import verify_reviews_node
 from helpers import save_json
 from const import (DEFAULT_LLM_URL, DEFAULT_LLM_MODEL, DEFAULT_REASONING_MODEL, 
-                   DEFAULT_TEMPERATURE, DEFAULT_MAX_REVIEWS, DEFAULT_RETRIEVER_MAX_RESULTS)
+                   DEFAULT_TEMPERATURE, DEFAULT_MAX_REVIEWS, DEFAULT_LANGUAGE, DEFAULT_RETRIEVER_MAX_RESULTS)
 from dotenv import load_dotenv
 
 # Load explicitly
@@ -27,6 +27,7 @@ DEFAULT_CONFIG = {
     "llm_temperature": float(os.getenv("LLM_TEMPERATURE", DEFAULT_TEMPERATURE)),
     "retriever_max_results": int(os.getenv("RETRIEVER_MAX_RESULTS", DEFAULT_RETRIEVER_MAX_RESULTS)),
     "max_reviews": int(os.getenv("MAX_REVIEWS", DEFAULT_MAX_REVIEWS)),
+    "language": os.getenv("LANGUAGE", DEFAULT_LANGUAGE),
     "skip_reformulation": False,
     "initial_urls": [],
     "disable_discovery": False
@@ -136,6 +137,8 @@ def main():
         "--id", help="Session ID for result folder naming", default=uuid.uuid4().hex[:8])
     parser.add_argument("--max_reviews", type=int, default=DEFAULT_CONFIG["max_reviews"],
                         help="Target number of reviews to collect")
+    parser.add_argument("--language", type=str, default=DEFAULT_CONFIG["language"],
+                        help="Language filter for reviews (e.g. 'en', 'de'). Set to None to disable.")
     parser.add_argument(
         "--urls", nargs="+", help="Seed URLs to start with (bypasses search engine)", default=[])
     parser.add_argument("--skip_refinement", action="store_true",
@@ -153,6 +156,8 @@ def main():
 
     # Consolidate configuration
     config = DEFAULT_CONFIG.copy()
+    if args.language:
+        config["language"] = args.language
     if args.urls:
         config["initial_urls"] = args.urls
     if args.skip_refinement:
