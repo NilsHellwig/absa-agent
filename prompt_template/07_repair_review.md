@@ -23,7 +23,7 @@ Your **objective** is to replace the provided truncated review snippet with the 
 3. Extract the full customer review text and provide it as `fixed_text`.
 4. Do not consider metadata, author names, dates, star ratings, or category scores when assessing completeness. Extract only the textual content of the review.
 5. The `fixed_text` must be present in the provided HTML segments. Do **not** invent, paraphrase, or hallucinate content.
-6. **Exclude metadata:** Supply only the feedback narrative. Do **not** include author names, dates, star ratings, or category scores.
+6. **Exclude metadata:** Supply only the full customer review text. Do **not** include author names, dates, star ratings, or category scores.
 7. If the reconstructed text is a **complete** original review, set `complete: true`.
 8. If the content is **still truncated** in the provided segments, set `complete: false`.
 
