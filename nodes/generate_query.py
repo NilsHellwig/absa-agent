@@ -15,7 +15,7 @@ def generate_query_node(state: GraphState):
         query = state["query"]
         config = state.get("config", {})
 
-        template = load_prompt("generate_query.md")
+        template = load_prompt("01_generate_query.md")
         schema_str = json.dumps(SearchQuery.model_json_schema(), indent=2)
         prompt = template.format(query=query, json_schema=schema_str)
 

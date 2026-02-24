@@ -150,7 +150,7 @@ def extract_and_detect_node(state: GraphState):
             page_text = soup.get_text(separator="\n", strip=True)
 
             # Templates & LLM
-            filter_page_template = load_prompt("filter_page.md")
+            filter_page_template = load_prompt("02_filter_page.md")
             filter_page_schema = json.dumps(
                 PageRelevanceResult.model_json_schema(), indent=2)
 
@@ -180,7 +180,7 @@ def extract_and_detect_node(state: GraphState):
                     {"url": url, "is_relevant": True, "cache_id": cache_id})
 
             # 1. Extract Reviews
-            extract_template = load_prompt("extract_reviews.md")
+            extract_template = load_prompt("03_extract_reviews.md")
             extract_schema = json.dumps(
                 ExtractionResult.model_json_schema(), indent=2)
 
@@ -211,7 +211,7 @@ def extract_and_detect_node(state: GraphState):
             if state["config"].get("disable_discovery"):
                 print("  Link discovery is disabled in config.")
             else:
-                detect_template = load_prompt("detect_review_links.md")
+                detect_template = load_prompt("04_detect_review_links.md")
                 detect_schema = json.dumps(
                     ReviewLinksDetection.model_json_schema(), indent=2)
 

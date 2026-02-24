@@ -7,3 +7,5 @@ python-dotenv
 argparse
 typing-extensions
 pydantic
+paramiko
+langchain_ollama
