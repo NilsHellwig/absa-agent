@@ -31,8 +31,8 @@ class ReviewLinksDetection(BaseModel):
 # --- Repair ---
 
 class RepairCheck(BaseModel):
-    is_incomplete: bool = Field(
-        description="True if the review is truncated/a snippet and needs reconstruction/completion, False if it is complete. Possible values: [true, false]")
+    complete: bool = Field(
+        description="True if the review is complete, False if it is truncated/a snippet and needs reconstruction/completion. Possible values: [true, false]")
 
 class RepairSearch(BaseModel):
     search_term: str = Field(
@@ -41,7 +41,7 @@ class RepairSearch(BaseModel):
 class RepairResult(BaseModel):
     fixed_text: str = Field(
         description="The reconstructed original full text (verbatim) from the webpage source.")
-    is_complete: bool = Field(
+    complete: bool = Field(
         description="True if the text is successfully reconstructed and complete, False if it remain truncated. Possible values: [true, false]")
 
 # --- Verification ---

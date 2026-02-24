@@ -98,7 +98,7 @@ def repair_reviews_node(state: GraphState):
             try:
                 check_res = check_llm.invoke(
                     check_prompt, config={"run_name": "Check-Review-Completeness"})
-                if not check_res.is_incomplete:
+                if check_res.complete:
                     repaired_batch.append(rev)
                     continue
             except Exception:
@@ -161,7 +161,7 @@ def repair_reviews_node(state: GraphState):
                         repair_prompt, config={"run_name": f"Repair-Attempt-{attempt}"})
                     current_text = repair_res.fixed_text
 
-                    if repair_res.is_complete:
+                    if repair_res.complete:
                         rev["review_text"] = current_text
                         repaired_batch.append(rev)
                         repaired_count += 1
